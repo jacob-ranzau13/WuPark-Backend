@@ -1,0 +1,46 @@
+service: wupark-backend-api
+
+provider:
+  name: aws
+  runtime: python3.11
+  region: us-east-1
+  stage: prod
+  environment:
+    TABLE_NAME: WuparkItemsTable
+
+functions:
+  wupark_items:
+    handler: handler.wupark_items
+    events:
+      - http:
+          path: wupark/items
+          method: get
+          cors: true
+      - http:
+          path: wupark/items
+          method: post
+          cors: true
+      - http:
+          path: wupark/items/{id}
+          method: get
+          cors: true
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: true   
+
+resources:
+  Resources:
+    WuparkItemsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: WuparkItemsTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
