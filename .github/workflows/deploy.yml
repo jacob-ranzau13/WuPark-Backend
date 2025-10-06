@@ -26,6 +26,9 @@ jobs:
       - name: Install Serverless Framework globally
         run: npm install -g serverless
 
+      - name: Install Serverless Python req. globally
+        run: npm install -g serverless-python-requirements
+
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
