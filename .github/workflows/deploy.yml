@@ -23,11 +23,8 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install Serverless Framework globally
-        run: npm install -g serverless
-
-      - name: Install Serverless Python req. globally
-        run: npm install -g serverless-python-requirements
+      - name: Install Node.js dependencies
+        run: npm install
 
       - name: Install Python dependencies
         run: |

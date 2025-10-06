@@ -1,0 +1,8 @@
+{
+  "name": "wupark-backend-api",
+  "version": "1.0.0",
+  "devDependencies": {
+    "serverless": "^4.20.2",
+    "serverless-python-requirements": "^6.0.0" 
+  }
+}
