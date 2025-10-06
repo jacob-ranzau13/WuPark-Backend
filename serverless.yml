@@ -1,5 +1,3 @@
-service: wupark-backend-api
-
 provider:
   name: aws
   runtime: python3.11
@@ -7,6 +5,18 @@ provider:
   stage: prod
   environment:
     TABLE_NAME: WuparkItemsTable
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - arn:aws:dynamodb:us-east-1:833100170434:table/WuparkItemsTable
 
 functions:
   wupark_items:
@@ -31,6 +41,6 @@ plugins:
 custom:
   pythonRequirements:
     dockerizePip: true  
-    
+
 resources:
   Resources: ${file(./config/sls.resources.yml)}
