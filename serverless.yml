@@ -30,18 +30,7 @@ plugins:
 
 custom:
   pythonRequirements:
-    dockerizePip: true   
-
+    dockerizePip: true  
+    
 resources:
-  Resources:
-    WuparkItemsTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: WuparkItemsTable
-        AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
-        KeySchema:
-          - AttributeName: id
-            KeyType: HASH
-        BillingMode: PAY_PER_REQUEST
+  Resources: ${file(./config/sls.resources.yml)}
