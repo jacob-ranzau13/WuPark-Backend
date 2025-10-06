@@ -17,8 +17,7 @@ provider:
             - dynamodb:PutItem
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
-          Resource:
-            - arn:aws:dynamodb:us-east-1:833100170434:table/WuparkItemsTable
+          Resource: arn:aws:dynamodb:us-east-1:833100170434:table/WuparkItemsTable
 
 functions:
   wupark_items:
@@ -42,7 +41,6 @@ plugins:
 
 custom:
   pythonRequirements:
-    dockerizePip: true  
+    dockerizePip: true
 
-resources:
-  Resources: ${file(./config/sls.resources.yml)}
+resources: ${file(./config/sls.resources.yml)}
