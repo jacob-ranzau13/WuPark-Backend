@@ -1,3 +1,5 @@
+service: wupark-backend-api
+
 provider:
   name: aws
   runtime: python3.11
