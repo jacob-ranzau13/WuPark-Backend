@@ -1,4 +1,4 @@
-service: wupark-backend-api
+service: wupark-backend-pi-to-image-api
 
 provider:
   name: aws
@@ -6,13 +6,14 @@ provider:
   region: us-east-1
   stage: prod
   environment:
-    TABLE_NAME: WuparkItemsTable
+    TABLE_NAME: Wupark-Pi-Image-Table
   iam:
     role:
       statements:
         - Effect: Allow
           Action:
             - dynamodb:Scan
+            - dynamodb:Query
             - dynamodb:GetItem
             - dynamodb:PutItem
             - dynamodb:UpdateItem
@@ -24,15 +25,15 @@ functions:
     handler: handler.wupark_items
     events:
       - http:
-          path: wupark/items
+          path: wupark/image
           method: get
           cors: true
       - http:
-          path: wupark/items
+          path: wupark/image
           method: post
           cors: true
       - http:
-          path: wupark/items/{id}
+          path: wupark/image/{lotId}
           method: get
           cors: true
 

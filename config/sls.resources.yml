@@ -2,11 +2,15 @@ Resources:
   WuparkItemsTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: WuparkItemsTable
+      TableName: Wupark-Pi-Image-Table
       AttributeDefinitions:
-        - AttributeName: id
-          AttributeType: S
+        - AttributeName: LotID
+          AttributeType: N
+        - AttributeName: Timestamp
+          AttributeType: N
       KeySchema:
-        - AttributeName: id
+        - AttributeName: LotID
           KeyType: HASH
+        - AttributeName: Timestamp
+          KeyType: RANGE
       BillingMode: PAY_PER_REQUEST

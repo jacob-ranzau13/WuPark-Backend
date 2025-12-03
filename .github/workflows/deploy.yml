@@ -1,9 +1,9 @@
-name: Deploy Wupark Backend API
+name: Deploy Wupark Backend Pi to Image API
 
 on:
   push:
     branches:
-      - main  
+      - Pi-to-database-api 
 
 jobs:
   deploy:
