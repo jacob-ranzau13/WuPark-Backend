@@ -21,8 +21,8 @@ provider:
           Resource: arn:aws:dynamodb:us-east-1:833100170434:table/WuparkItemsTable
 
 functions:
-  wupark_items:
-    handler: handler.wupark_items
+  wupark_images:
+    handler: handler.wupark_images
     events:
       - http:
           path: wupark/image
