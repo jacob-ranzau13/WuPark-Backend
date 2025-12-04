@@ -17,4 +17,8 @@ Resources:
           KeyType: HASH
         - AttributeName: timestamp
           KeyType: RANGE
+        - AttributeName: status
+          KeyType: RANGE
+        - AttributeName: image
+          KeyType: RANGE
       BillingMode: PAY_PER_REQUEST
