@@ -76,38 +76,45 @@ def run_roboflow_workflow(image_path: str) -> List[Dict[str, Any]]:
     )
 
     try:
-        print(f"[ImageProcessor] Workflow result: {json.dumps(wf_result, default=str)[:500]}")
+        print(f"[ImageProcessor] Workflow result type: {type(wf_result)}")
+        print(f"[ImageProcessor] Workflow result: {json.dumps(wf_result, default=str)[:1000]}")
         
-        # Try different possible response structures
-        if isinstance(wf_result, list) and len(wf_result) > 0:
-            result = wf_result[0]
-            
-            # Try nested predictions structure
-            if "predictions" in result and isinstance(result["predictions"], dict):
-                if "predictions" in result["predictions"]:
-                    preds = result["predictions"]["predictions"]
+        # The result might already be a list of predictions
+        if isinstance(wf_result, list):
+            # Check if it's already a list of predictions (dicts with class, confidence, etc.)
+            if len(wf_result) > 0 and isinstance(wf_result[0], dict):
+                # If first item has 'class' or 'predictions' key, it's predictions
+                if 'class' in wf_result[0] or 'confidence' in wf_result[0]:
+                    preds = wf_result
+                # Otherwise it's a wrapped response
+                elif 'predictions' in wf_result[0]:
+                    result = wf_result[0]
+                    if isinstance(result["predictions"], dict) and "predictions" in result["predictions"]:
+                        preds = result["predictions"]["predictions"]
+                    elif isinstance(result["predictions"], list):
+                        preds = result["predictions"]
+                    else:
+                        preds = []
                 else:
-                    preds = result["predictions"]
-            # Try direct predictions
-            elif "predictions" in result:
-                preds = result["predictions"]
-            # Try outputs structure
-            elif "outputs" in result:
-                preds = result["outputs"]
+                    preds = []
             else:
-                print(f"[ImageProcessor] Unknown result structure: {list(result.keys())}")
+                preds = []
+        elif isinstance(wf_result, dict):
+            # Handle dict response
+            if "predictions" in wf_result:
+                preds = wf_result["predictions"]
+            else:
                 preds = []
         else:
-            print(f"[ImageProcessor] Unexpected workflow result type")
             preds = []
             
         print(f"[ImageProcessor] Extracted {len(preds)} predictions")
         return preds
         
-    except (KeyError, IndexError, TypeError) as e:
+    except Exception as e:
         print(f"[ImageProcessor] Error extracting predictions: {e}")
         print(f"[ImageProcessor] Full result: {wf_result}")
-        raise
+        return []
 
 
 # ==========================
