@@ -1,4 +1,4 @@
-name: Deploy Wupark Backend API
+name: Deploy Wupark Backend Image Processing
 
 on:
   push:

@@ -1,4 +1,4 @@
-service: wupark-backend-api
+service: wupark-backend-image-processing
 
 provider:
   name: aws
