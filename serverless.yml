@@ -39,5 +39,10 @@ custom:
   pythonRequirements:
     dockerizePip: non-linux
     slim: true
+    strip: false
     zip: true
-    layer: true
+    usePoetry: false
+    useDownloadCache: true
+    useStaticCache: true
+    pipCmdExtraArgs:
+      - --no-cache-dir
