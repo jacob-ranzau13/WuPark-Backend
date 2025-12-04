@@ -40,12 +40,10 @@ plugins:
 
 custom:
   pythonRequirements:
-    dockerizePip: non-linux
-    slim: true
+    dockerizePip: true
+    slim: false
     strip: false
-    zip: true
+    layer: true
     usePoetry: false
-    useDownloadCache: true
-    useStaticCache: true
     pipCmdExtraArgs:
       - --no-cache-dir
