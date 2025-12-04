@@ -15,7 +15,7 @@ from getFromImageDB import get_stall_config
 # ==========================
 ROBOFLOW_API_KEY = os.getenv("ROBOFLOW_API_KEY")
 ROBOFLOW_WORKSPACE = "wupark-demo-model"
-ROBOFLOW_WORKFLOW_ID = "find-cars"
+ROBOFLOW_WORKFLOW_ID = "find-cars-2"
 
 rf_client = InferenceHTTPClient(
     api_url="https://serverless.roboflow.com",
