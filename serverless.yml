@@ -18,7 +18,7 @@ provider:
             - dynamodb:PutItem
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
-          Resource: arn:aws:dynamodb:us-east-1:833100170434:table/WuparkItemsTable
+          Resource: arn:aws:dynamodb:us-east-1:833100170434:table/Wupark-Pi-Image-Table
 
 functions:
   wupark_images:
