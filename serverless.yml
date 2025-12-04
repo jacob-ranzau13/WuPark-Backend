@@ -1,5 +1,7 @@
 service: wupark-backend-image-processing
 
+frameworkVersion: ~4.27.0
+
 provider:
   name: aws
   runtime: python3.11
@@ -33,9 +35,9 @@ functions:
           startingPosition: LATEST
           enabled: true
 
-plugins:
-  - serverless-python-requirements
-
 custom:
   pythonRequirements:
-    dockerizePip: true
+    dockerizePip: non-linux
+    slim: true
+    zip: true
+    layer: true
