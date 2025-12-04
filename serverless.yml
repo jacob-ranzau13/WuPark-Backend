@@ -34,9 +34,3 @@ functions:
           batchSize: 10
           startingPosition: LATEST
           enabled: true
-
-custom:
-  pythonRequirements:
-    dockerizePip: false
-    layer: false
-    zip: true
