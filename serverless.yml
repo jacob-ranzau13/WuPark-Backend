@@ -30,7 +30,7 @@ functions:
     events:
       - stream:
           type: dynamodb
-          arn: ${env:DYNAMODB_STREAM_ARN}
+          arn: arn:aws:dynamodb:us-east-1:833100170434:table/Wupark-Pi-Image-Table/stream/*
           batchSize: 10
           startingPosition: LATEST
           enabled: true
