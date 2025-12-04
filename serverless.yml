@@ -20,19 +20,15 @@ provider:
           Resource: arn:aws:dynamodb:us-east-1:833100170434:table/WuparkItemsTable
 
 functions:
-  wupark_items:
-    handler: handler.wupark_items
+  parking_availability:
+    handler: handler.parking_availability
     events:
       - http:
-          path: wupark/items
-          method: get
-          cors: true
-      - http:
-          path: wupark/items
+          path: parking/availability
           method: post
           cors: true
       - http:
-          path: wupark/items/{id}
+          path: parking/availability/{lotNum}
           method: get
           cors: true
 
