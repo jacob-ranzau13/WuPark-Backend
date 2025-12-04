@@ -95,8 +95,11 @@ def process_image_stream(event, context):
     print(f"[ImageProcessor] Processing {len(event['Records'])} records")
     
     for record in event['Records']:
-        if record['eventName'] != 'INSERT':
-            print(f"[ImageProcessor] Skipping {record['eventName']} event")
+        event_name = record['eventName']
+        
+        # Process both INSERT and MODIFY events
+        if event_name not in ['INSERT', 'MODIFY']:
+            print(f"[ImageProcessor] Skipping {event_name} event")
             continue
         
         try:
