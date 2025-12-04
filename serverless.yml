@@ -21,7 +21,10 @@ provider:
             - dynamodb:GetShardIterator
             - dynamodb:DescribeStream
             - dynamodb:ListStreams
-          Resource: arn:aws:dynamodb:us-east-1:833100170434:table/Wupark-Pi-Image-Table/stream/*
+          Resource:
+            Fn::GetAtt:
+              - Wupark-Pi-Image-Table
+              - StreamArn
 
 functions:
   image_processor:
@@ -30,7 +33,10 @@ functions:
     events:
       - stream:
           type: dynamodb
-          arn: arn:aws:dynamodb:us-east-1:833100170434:table/Wupark-Pi-Image-Table
+          arn:
+            Fn::GetAtt:
+              - Wupark-Pi-Image-Table
+              - StreamArn
           batchSize: 10
           startingPosition: LATEST
           enabled: true
