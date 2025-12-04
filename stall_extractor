@@ -1,0 +1,71 @@
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+def extract_stall_centers(image_path, min_column_gap=20, show=True):
+    img = cv2.imread(image_path, cv2.IMREAD_COLOR)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    # Threshold to isolate stall lines
+    _, thresh = cv2.threshold(gray, 200, 255, cv2.THRESH_BINARY)
+
+    # Detect vertical lines
+    lines = cv2.HoughLinesP(thresh, 1, np.pi/180, threshold=60,
+                            minLineLength=20, maxLineGap=5)
+
+    stall_centers = []
+    if lines is not None:
+        # Filter near-vertical lines
+        verticals = [l[0] for l in lines if abs(l[0][0] - l[0][2]) < 5]
+        verticals = sorted(verticals, key=lambda x: x[0])
+
+        # Collapse nearby x values → unique columns
+        xs = []
+        for v in verticals:
+            if not xs or abs(v[0] - xs[-1]) > min_column_gap:
+                xs.append(v[0])
+
+        # Process each column
+        for x in xs:
+            col_mask = thresh[:, x-2:x+2]
+            hist = np.sum(col_mask, axis=1)
+
+            divs = np.where(hist > np.max(hist)*0.5)[0]
+            if len(divs) > 1:
+                clusters, cluster = [], [divs[0]]
+                for d in divs[1:]:
+                    if d - cluster[-1] < 10:
+                        cluster.append(d)
+                    else:
+                        clusters.append(cluster)
+                        cluster = [d]
+                clusters.append(cluster)
+
+                # Stall dividing lines
+                lines_y = [int(np.mean(c)) for c in clusters]
+
+                # Midpoints = stall centers
+                centers_y = [(lines_y[i] + lines_y[i+1]) // 2 for i in range(len(lines_y)-1)]
+                stall_centers.append([(x, y) for y in centers_y])
+
+    # Debug visualization
+    if show:
+        debug_img = img.copy()
+        for col in stall_centers:
+            for (x, y) in col:
+                cv2.circle(debug_img, (x, y), 5, (0, 0, 255), -1)
+        plt.figure(figsize=(6, 6))
+        plt.imshow(cv2.cvtColor(debug_img, cv2.COLOR_BGR2RGB))
+        plt.title("Stall Centers")
+        plt.show()
+
+    return stall_centers
+
+if __name__ == "__main__":
+    # Replace with your file path
+    image_path = "LotImages/Lot4.jpg"
+    stalls = extract_stall_centers(image_path, min_column_gap=40, show=True)
+
+    print("\nExtracted stall coordinates grouped by columns:")
+    for i, col in enumerate(stalls, start=1):
+        print(f"Column {i}: {col}")
