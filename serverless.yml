@@ -37,6 +37,6 @@ functions:
 
 custom:
   pythonRequirements:
-    dockerizePip: true
+    dockerizePip: false
     layer: false
     zip: true
