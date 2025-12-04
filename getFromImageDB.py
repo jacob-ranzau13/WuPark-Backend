@@ -19,13 +19,7 @@ DEFAULT_STALLS: Dict[str, Dict[str, int]] = {
 
 
 def get_stall_config() -> Dict[str, Dict[str, int]]:
-    """
-    Get stall configuration from the API.
-    Falls back to default configuration if API is unavailable.
     
-    Returns:
-        Dictionary mapping stall IDs to bounding box coordinates
-    """
     if not GET_STALL_CONFIG_URL:
         print(f"[GetFromImageDB] No config URL set, using default stalls")
         return DEFAULT_STALLS
