@@ -3,7 +3,7 @@ name: Deploy Wupark Backend API
 on:
   push:
     branches:
-      - WuPark-ImageProcessing 
+      - Wupark-ImageProcessing 
 
 jobs:
   deploy:
