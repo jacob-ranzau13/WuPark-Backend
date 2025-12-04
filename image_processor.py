@@ -46,12 +46,18 @@ def compute_availability_from_predictions(
     }
 
     for idx, det in enumerate(preds):
+        # Handle both "class" and "class_id" (where 0 typically means "car")
         label = det.get("class")
+        class_id = det.get("class_id")
+        
         conf = det.get("confidence", 0.0)
         x = det.get("x")
         y = det.get("y")
 
-        if label != target_class:
+        # Accept if label matches target_class OR if class_id is 0 (typically car)
+        is_target_class = (label == target_class) or (class_id == 0 and target_class == "car")
+        
+        if not is_target_class:
             continue
         if conf < conf_thresh:
             continue
@@ -77,32 +83,30 @@ def run_roboflow_workflow(image_path: str) -> List[Dict[str, Any]]:
 
     try:
         print(f"[ImageProcessor] Workflow result type: {type(wf_result)}")
-        print(f"[ImageProcessor] Workflow result: {json.dumps(wf_result, default=str)[:1000]}")
         
-        # The result might already be a list of predictions
-        if isinstance(wf_result, list):
-            # Check if it's already a list of predictions (dicts with class, confidence, etc.)
-            if len(wf_result) > 0 and isinstance(wf_result[0], dict):
-                # If first item has 'class' or 'predictions' key, it's predictions
-                if 'class' in wf_result[0] or 'confidence' in wf_result[0]:
-                    preds = wf_result
-                # Otherwise it's a wrapped response
-                elif 'predictions' in wf_result[0]:
-                    result = wf_result[0]
-                    if isinstance(result["predictions"], dict) and "predictions" in result["predictions"]:
-                        preds = result["predictions"]["predictions"]
-                    elif isinstance(result["predictions"], list):
-                        preds = result["predictions"]
+        # Expected structure: [{"outputs": [{"predictions": {"predictions": [...]}}]}]
+        if isinstance(wf_result, list) and len(wf_result) > 0:
+            first_item = wf_result[0]
+            
+            if isinstance(first_item, dict):
+                # Check for outputs structure
+                if "outputs" in first_item and isinstance(first_item["outputs"], list):
+                    if len(first_item["outputs"]) > 0:
+                        output = first_item["outputs"][0]
+                        if "predictions" in output and isinstance(output["predictions"], dict):
+                            if "predictions" in output["predictions"]:
+                                preds = output["predictions"]["predictions"]
+                            else:
+                                preds = []
+                        else:
+                            preds = []
                     else:
                         preds = []
+                # Check if it's direct predictions list
+                elif 'class' in first_item or 'confidence' in first_item:
+                    preds = wf_result
                 else:
                     preds = []
-            else:
-                preds = []
-        elif isinstance(wf_result, dict):
-            # Handle dict response
-            if "predictions" in wf_result:
-                preds = wf_result["predictions"]
             else:
                 preds = []
         else:
@@ -113,7 +117,8 @@ def run_roboflow_workflow(image_path: str) -> List[Dict[str, Any]]:
         
     except Exception as e:
         print(f"[ImageProcessor] Error extracting predictions: {e}")
-        print(f"[ImageProcessor] Full result: {wf_result}")
+        import traceback
+        traceback.print_exc()
         return []
 
 
