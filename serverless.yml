@@ -35,9 +35,6 @@ functions:
           startingPosition: LATEST
           enabled: true
 
-plugins:
-  - serverless-python-requirements
-
 custom:
   pythonRequirements:
     dockerizePip: true
