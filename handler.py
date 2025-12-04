@@ -33,16 +33,16 @@ def wupark_images(event, context):
                 one_minute_ago = current_time - 60
                 
                 query_response = table.query(
-                    KeyConditionExpression=Key('LotID').eq(int(lot_id)) & Key('Timestamp').gte(one_minute_ago)
+                    KeyConditionExpression=Key('lotNum').eq(int(lot_id)) & Key('timestamp').gte(one_minute_ago)
                 )
                 items = query_response.get('Items', [])
                 
                 for item in items:
-                    if 'Payload' in item and isinstance(item['Payload'], bytes):
-                        item['Payload'] = base64.b64encode(item['Payload']).decode('utf-8')
-                    item['LotID'] = int(item['LotID'])
-                    item['Timestamp'] = int(item['Timestamp'])
-                    item['Status'] = int(item['Status'])
+                    if 'image' in item and isinstance(item['image'], bytes):
+                        item['image'] = base64.b64encode(item['image']).decode('utf-8')
+                    item['lotNum'] = int(item['lotNum'])
+                    item['timestamp'] = int(item['timestamp'])
+                    item['status'] = int(item['status'])
                 
                 return response(200, items)
             else:
@@ -50,17 +50,17 @@ def wupark_images(event, context):
                 one_minute_ago = current_time - 60
                 
                 scan_response = table.scan(
-                    FilterExpression=Key('Timestamp').gte(one_minute_ago)
+                    FilterExpression=Key('timestamp').gte(one_minute_ago)
                 )
                 items = scan_response.get('Items', [])
                 
                
                 for item in items:
-                    if 'Payload' in item and isinstance(item['Payload'], bytes):
-                        item['Payload'] = base64.b64encode(item['Payload']).decode('utf-8')
-                    item['LotID'] = int(item['LotID'])
-                    item['Timestamp'] = int(item['Timestamp'])
-                    item['Status'] = int(item['Status'])
+                    if 'image' in item and isinstance(item['image'], bytes):
+                        item['image'] = base64.b64encode(item['image']).decode('utf-8')
+                    item['lotNum'] = int(item['lotNum'])
+                    item['timestamp'] = int(item['timestamp'])
+                    item['status'] = int(item['status'])
                 
                 return response(200, items)
 
@@ -71,27 +71,27 @@ def wupark_images(event, context):
             data = json.loads(body)
             
             
-            if 'LotID' not in data:
-                return response(400, {"message": "LotID is required"})
+            if 'lotNum' not in data:
+                return response(400, {"message": "lotNum is required"})
             
             item = {
-                'LotID': int(data['LotID']),
-                'Timestamp': int(data.get('Timestamp', time.time())),
-                'Status': int(data.get('Status', 0)),
+                'lotNum': int(data['lotNum']),
+                'timestamp': int(data.get('timestamp', time.time())),
+                'status': int(data.get('status', 0)),
             }
             
-            if 'Payload' in data:
+            if 'image' in data:
                 
-                if isinstance(data['Payload'], str):
-                    item['Payload'] = base64.b64decode(data['Payload'])
+                if isinstance(data['image'], str):
+                    item['image'] = base64.b64decode(data['image'])
                 else:
-                    item['Payload'] = data['Payload']
+                    item['image'] = data['image']
 
             table.put_item(Item=item)
             
             response_item = item.copy()
-            if 'Payload' in response_item and isinstance(response_item['Payload'], bytes):
-                response_item['Payload'] = base64.b64encode(response_item['Payload']).decode('utf-8')
+            if 'image' in response_item and isinstance(response_item['image'], bytes):
+                response_item['image'] = base64.b64encode(response_item['image']).decode('utf-8')
             
             return response(201, response_item)
 
