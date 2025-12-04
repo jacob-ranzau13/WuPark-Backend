@@ -4,9 +4,13 @@ Resources:
     Properties:
       TableName: WuparkItemsTable
       AttributeDefinitions:
-        - AttributeName: id
-          AttributeType: S
+        - AttributeName: lotNum
+          AttributeType: N
+        - AttributeName: timestamp
+          AttributeType: N
       KeySchema:
-        - AttributeName: id
+        - AttributeName: lotNum
           KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
       BillingMode: PAY_PER_REQUEST
