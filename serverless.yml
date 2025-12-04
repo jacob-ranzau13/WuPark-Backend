@@ -41,12 +41,4 @@ plugins:
 custom:
   pythonRequirements:
     dockerizePip: true
-    dockerImage: public.ecr.aws/sam/build-python3.11:latest
-    slim: false
-    strip: false
     layer: true
-    usePoetry: false
-    pipCmdExtraArgs:
-      - --platform=manylinux2014_x86_64
-      - --only-binary=:all:
-      - --no-cache-dir
