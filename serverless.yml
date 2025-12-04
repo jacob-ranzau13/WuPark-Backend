@@ -6,35 +6,33 @@ provider:
   region: us-east-1
   stage: prod
   environment:
-    TABLE_NAME: WuparkItemsTable
+    IMAGE_TABLE_NAME: Wupark-Pi-Image-Table
   iam:
     role:
       statements:
         - Effect: Allow
           Action:
-            - dynamodb:Scan
-            - dynamodb:GetItem
-            - dynamodb:PutItem
-            - dynamodb:UpdateItem
-            - dynamodb:DeleteItem
-          Resource: arn:aws:dynamodb:us-east-1:833100170434:table/WuparkItemsTable
+            - dynamodb:GetRecords
+            - dynamodb:GetShardIterator
+            - dynamodb:DescribeStream
+            - dynamodb:ListStreams
+          Resource: arn:aws:dynamodb:us-east-1:833100170434:table/Wupark-Pi-Image-Table/stream/*
 
 functions:
-  wupark_items:
-    handler: handler.wupark_items
+  image_processor:
+    handler: image_processor.process_image_stream
+    timeout: 300
+    environment:
+      ROBOFLOW_API_KEY: ${env:ROBOFLOW_API_KEY}
+      POST_AVAILABILITY_URL: ${env:POST_AVAILABILITY_URL}
+      GET_STALL_CONFIG_URL: ${env:GET_STALL_CONFIG_URL}
     events:
-      - http:
-          path: wupark/items
-          method: get
-          cors: true
-      - http:
-          path: wupark/items
-          method: post
-          cors: true
-      - http:
-          path: wupark/items/{id}
-          method: get
-          cors: true
+      - stream:
+          type: dynamodb
+          arn: arn:aws:dynamodb:us-east-1:833100170434:table/Wupark-Pi-Image-Table
+          batchSize: 10
+          startingPosition: LATEST
+          enabled: true
 
 plugins:
   - serverless-python-requirements
@@ -42,5 +40,3 @@ plugins:
 custom:
   pythonRequirements:
     dockerizePip: true
-
-resources: ${file(./config/sls.resources.yml)}
