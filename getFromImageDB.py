@@ -3,7 +3,7 @@ import requests
 from typing import Dict, Any, Optional
 
 
-GET_STALL_CONFIG_URL = os.getenv("GET_STALL_CONFIG_URL", "")
+GET_STALL_CONFIG_URL = os.getenv("GET_STALL_CONFIG_URL")
 
 # Default stall configuration
 DEFAULT_STALLS: Dict[str, Dict[str, int]] = {
