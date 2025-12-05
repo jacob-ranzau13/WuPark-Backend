@@ -171,15 +171,20 @@ def process_image_stream(event, context):
                 
                 # Compute availability
                 availability = compute_availability_from_predictions(predictions, stalls)
-                
+
+                # Prepare availability payload for posting: remove internal 'cars' arrays
+                post_availability_map = {
+                    sid: {"occupied": info.get("occupied", False)}
+                    for sid, info in availability.items()
+                }
+
                 # Post to existing API using postToItemsDb
                 payload = {
                     "lotNum": lot_num,
                     "timestamp": timestamp,
-                    "availability": availability,
-                    "status": status
+                    "availability": post_availability_map,
                 }
-                
+
                 post_availability(payload)
                 
             finally:
