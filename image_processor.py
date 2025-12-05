@@ -126,10 +126,7 @@ def run_roboflow_workflow(image_path: str) -> List[Dict[str, Any]]:
 # MAIN HANDLER
 # ==========================
 def process_image_stream(event, context):
-    """
-    Lambda handler triggered by DynamoDB Stream from Wupark-Pi-Image-Table.
-    Processes new image entries and posts results to existing API.
-    """
+    
     print(f"[ImageProcessor] Processing {len(event['Records'])} records")
     
     for record in event['Records']:
