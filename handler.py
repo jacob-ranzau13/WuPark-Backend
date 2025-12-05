@@ -51,58 +51,49 @@ def parking_availability(event, context):
         if http_method == 'GET':
             lot_num = path_params.get('lotNum')
             
+            
             if not lot_num:
-                return response(400, {"message": "lotNum is required"})
+                scan_response = table.scan(
+                    Limit=1000  
+                )
+                items = scan_response.get('Items', [])
+                
+                if not items:
+                    return response(200, {
+                        "message": "No parking data found",
+                        "data": None
+                    })
+                
+                most_recent = max(items, key=lambda x: x.get('timestamp', 0))
+                
+                return response(200, {
+                    "message": "Most recent parking availability",
+                    "data": most_recent
+                })
             
             try:
                 lot_num = int(lot_num)
             except ValueError:
                 return response(400, {"message": "lotNum must be a number"})
             
-            
-            start_time = query_params.get('startTime')
-            end_time = query_params.get('endTime')
-            limit = query_params.get('limit', '100')
-            
-            try:
-                limit = int(limit)
-            except ValueError:
-                limit = 100
-            
-            # Build query
             query_kwargs = {
                 'KeyConditionExpression': Key('lotNum').eq(lot_num),
-                'Limit': limit,
+                'Limit': 1,
                 'ScanIndexForward': False  
             }
-        
-            if start_time and end_time:
-                try:
-                    start_time = int(start_time)
-                    end_time = int(end_time)
-                    query_kwargs['KeyConditionExpression'] = Key('lotNum').eq(lot_num) & Key('timestamp').between(start_time, end_time)
-                except ValueError:
-                    return response(400, {"message": "startTime and endTime must be numbers"})
-            elif start_time:
-                try:
-                    start_time = int(start_time)
-                    query_kwargs['KeyConditionExpression'] = Key('lotNum').eq(lot_num) & Key('timestamp').gte(start_time)
-                except ValueError:
-                    return response(400, {"message": "startTime must be a number"})
-            elif end_time:
-                try:
-                    end_time = int(end_time)
-                    query_kwargs['KeyConditionExpression'] = Key('lotNum').eq(lot_num) & Key('timestamp').lte(end_time)
-                except ValueError:
-                    return response(400, {"message": "endTime must be a number"})
             
             query_response = table.query(**query_kwargs)
             items = query_response.get('Items', [])
             
+            if not items:
+                return response(200, {
+                    "message": f"No parking data found for lot {lot_num}",
+                    "data": None
+                })
+            
             return response(200, {
-                "lotNum": lot_num,
-                "count": len(items),
-                "items": items
+                "message": f"Most recent parking availability for lot {lot_num}",
+                "data": items[0]
             })
 
         elif http_method == 'POST':
