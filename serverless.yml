@@ -22,20 +22,13 @@ provider:
 
 functions:
   wupark_images:
-    handler: handler.wupark_images
+    handler: handler.handler
     events:
-      - http:
-          path: wupark/image
-          method: get
-          cors: true
       - http:
           path: wupark/image
           method: post
           cors: true
-      - http:
-          path: wupark/image/{lotId}
-          method: get
-          cors: true
+     
 
 plugins:
   - serverless-python-requirements
