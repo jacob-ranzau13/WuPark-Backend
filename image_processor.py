@@ -38,7 +38,6 @@ def compute_availability_from_predictions(
     }
 
     for idx, det in enumerate(preds):
-        # Handle both "class" and "class_id" (where 0 typically means "car")
         label = det.get("class")
         class_id = det.get("class_id")
         
@@ -46,7 +45,6 @@ def compute_availability_from_predictions(
         x = det.get("x")
         y = det.get("y")
 
-        # Accept if label matches target_class OR if class_id is 0 (typically car)
         is_target_class = (label == target_class) or (class_id == 0 and target_class == "car")
         
         if not is_target_class:
@@ -72,44 +70,12 @@ def run_roboflow_workflow(image_path: str) -> List[Dict[str, Any]]:
     )
 
     try:
-        print(f"[ImageProcessor] Workflow result type: {type(wf_result)}")
-        
-        # Expected structure: [{"outputs": [{"predictions": {"predictions": [...]}}]}]
-        if isinstance(wf_result, list) and len(wf_result) > 0:
-            first_item = wf_result[0]
-            
-            if isinstance(first_item, dict):
-                # Check for outputs structure
-                if "outputs" in first_item and isinstance(first_item["outputs"], list):
-                    if len(first_item["outputs"]) > 0:
-                        output = first_item["outputs"][0]
-                        if "predictions" in output and isinstance(output["predictions"], dict):
-                            if "predictions" in output["predictions"]:
-                                preds = output["predictions"]["predictions"]
-                            else:
-                                preds = []
-                        else:
-                            preds = []
-                    else:
-                        preds = []
-                # Check if it's direct predictions list
-                elif 'class' in first_item or 'confidence' in first_item:
-                    preds = wf_result
-                else:
-                    preds = []
-            else:
-                preds = []
-        else:
-            preds = []
-            
-        print(f"[ImageProcessor] Extracted {len(preds)} predictions")
-        return preds
-        
-    except Exception as e:
+        predicts = wf_result[0]["predictions"]["predictions"]
+    except (KeyError, IndexError, TypeError) as e:
         print(f"[ImageProcessor] Error extracting predictions: {e}")
         raise
 
-    return preds
+    return predicts
 
 
 # Main Lambda handler
@@ -120,7 +86,7 @@ def process_image_stream(event, context):
     for record in event['Records']:
         event_name = record['eventName']
         
-        # Process both INSERT and MODIFY events
+        # Process both INSERT and MODIFY 
         if event_name not in ['INSERT', 'MODIFY']:
             print(f"[ImageProcessor] Skipping {event_name} event")
             continue
@@ -153,13 +119,7 @@ def process_image_stream(event, context):
                 # Get stall availability
                 availability = compute_availability_from_predictions(predictions, stalls)
 
-                # Prepare availability payload for posting: remove internal 'cars' arrays
-                post_availability_map = {
-                    sid: {"occupied": info.get("occupied", False)}
-                    for sid, info in availability.items()
-                }
-
-                # Post to existing API using postToItemsDb
+                # Post to API using postToItemsDb
                 payload = {
                     "lotNum": lot_num,
                     "timestamp": timestamp,
