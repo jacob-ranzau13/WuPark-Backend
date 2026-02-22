@@ -47,18 +47,6 @@ functions:
               - X-Api-Key
               - X-Amz-Security-Token
             allowCredentials: false
-      - http:
-          path: parking/availability
-          method: get
-          cors:
-            origin: '*'
-            headers:
-              - Content-Type
-              - X-Amz-Date
-              - Authorization
-              - X-Api-Key
-              - X-Amz-Security-Token
-            allowCredentials: false
 
 plugins:
   - serverless-python-requirements
