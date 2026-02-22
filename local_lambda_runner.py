@@ -1,11 +1,5 @@
-"""
-Simple local runner to simulate a DynamoDB Stream INSERT event and call the
-`process_image_stream` handler in `image_processor.py`.
+# This simulates DynamoDB events for local testing
 
-This runner defaults to mocking Roboflow and the POST API so it can be used
-without network access. Use `--no-mock` to let it call real endpoints (if
-environment variables are configured).
-"""
 import argparse
 import base64
 import json

@@ -7,12 +7,9 @@ from inference_sdk import InferenceHTTPClient
 
 # Import our API modules
 from postToItemsDb import post_availability
-from getFromImageDB import get_stall_config
+from getStallInfo import get_stall_config
 
 
-# ==========================
-# CONFIGURATION
-# ==========================
 ROBOFLOW_API_KEY = os.getenv("ROBOFLOW_API_KEY")
 ROBOFLOW_WORKSPACE = "wupark-demo-model"
 ROBOFLOW_WORKFLOW_ID = "find-cars-2"
@@ -23,25 +20,20 @@ rf_client = InferenceHTTPClient(
 )
 
 
-# ==========================
-# HELPER FUNCTIONS
-# ==========================
+# Helper function to check if a point is inside a bounding box
 def point_in_box(x: float, y: float, box: Dict[str, int]) -> bool:
-    """Check if a point (x, y) is inside a bounding box."""
     return box["x1"] <= x <= box["x2"] and box["y1"] <= y <= box["y2"]
 
-
+# Function to actually compare Roboflow centerpoint with stall boundaries
 def compute_availability_from_predictions(
     preds: List[Dict[str, Any]],
     stalls: Dict[str, Dict[str, int]],
     target_class: str = "car",
     conf_thresh: float = 0.4,
 ) -> Dict[str, Any]:
-    """
-    Compute which stalls are occupied based on car detection predictions.
-    """
+    
     status: Dict[str, Dict[str, Any]] = {
-        sid: {"occupied": False, "cars": []}
+        sid: {"occupied": False}
         for sid in stalls.keys()
     }
 
@@ -61,13 +53,11 @@ def compute_availability_from_predictions(
         for stall_id, box in stalls.items():
             if point_in_box(x, y, box):
                 status[stall_id]["occupied"] = True
-                status[stall_id]["cars"].append(idx)
 
     return status
 
 
 def run_roboflow_workflow(image_path: str) -> List[Dict[str, Any]]:
-    """Run the Roboflow workflow on an image."""
     wf_result = rf_client.run_workflow(
         workspace_name=ROBOFLOW_WORKSPACE,
         workflow_id=ROBOFLOW_WORKFLOW_ID,
@@ -84,14 +74,9 @@ def run_roboflow_workflow(image_path: str) -> List[Dict[str, Any]]:
     return preds
 
 
-# ==========================
-# MAIN HANDLER
-# ==========================
+# Main Lambda handler
 def process_image_stream(event, context):
-    """
-    Lambda handler triggered by DynamoDB Stream from Wupark-Pi-Image-Table.
-    Processes new image entries and posts results to existing API.
-    """
+
     print(f"[ImageProcessor] Processing {len(event['Records'])} records")
     
     for record in event['Records']:
@@ -104,7 +89,6 @@ def process_image_stream(event, context):
             
             lot_num = int(new_image['lotNum']['N'])
             timestamp = int(new_image['timestamp']['N'])
-            status = int(new_image.get('status', {}).get('N', 0))
             
             image_b64 = new_image.get('image', {}).get('B')
             if not image_b64:
@@ -113,30 +97,26 @@ def process_image_stream(event, context):
             
             image_bytes = base64.b64decode(image_b64)
             
-            print(f"[ImageProcessor] Processing lot {lot_num}, timestamp {timestamp}")
-            
-            # Get stall configuration using getFromImageDB
+            # Get stall coordinates using getStallInfo
             stalls = get_stall_config()
             
-            # Save image to temp file
+            # Give image bytes a file path for Roboflow
             with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp:
                 tmp.write(image_bytes)
                 tmp_path = tmp.name
             
             try:
-                # Run YOLO detection
+                # Run Roboflow detection
                 predictions = run_roboflow_workflow(tmp_path)
-                print(f"[ImageProcessor] Detected {len(predictions)} objects")
                 
-                # Compute availability
+                # Get stall availability
                 availability = compute_availability_from_predictions(predictions, stalls)
                 
                 # Post to existing API using postToItemsDb
                 payload = {
                     "lotNum": lot_num,
                     "timestamp": timestamp,
-                    "availability": availability,
-                    "status": status
+                    "availability": availability
                 }
                 
                 post_availability(payload)
@@ -151,5 +131,5 @@ def process_image_stream(event, context):
     
     return {
         'statusCode': 200,
-        'body': json.dumps({'message': 'Processing complete'})
+        'body': json.dumps({'[ImageProcessor]': 'Processing complete'})
     }

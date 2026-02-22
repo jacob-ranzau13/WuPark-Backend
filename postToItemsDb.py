@@ -7,15 +7,6 @@ POST_AVAILABILITY_URL = os.getenv("POST_AVAILABILITY_URL")
 
 
 def post_availability(payload: Dict[str, Any]) -> bool:
-    """
-    Post availability results to the external API.
-    
-    Args:
-        payload: Dictionary containing lotNum, timestamp, availability, and status
-        
-    Returns:
-        True if successful, False otherwise
-    """
     if not POST_AVAILABILITY_URL:
         print("[PostToItemsDb] POST_AVAILABILITY_URL not configured")
         return False
