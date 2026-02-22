@@ -30,14 +30,7 @@ functions:
     events:
       - stream:
           type: dynamodb
-          arn: arn:aws:dynamodb:us-east-1:833100170434:table/Wupark-Pi-Image-Table
+          arn: arn:aws:dynamodb:us-east-1:833100170434:table/Wupark-Pi-Image-Table/stream/2025-12-04T18:10:06.697
           batchSize: 10
           startingPosition: LATEST
           enabled: true
-
-custom:
-  pythonRequirements:
-    dockerizePip: non-linux
-    slim: true
-    zip: true
-    layer: true
