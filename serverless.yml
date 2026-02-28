@@ -7,6 +7,9 @@ provider:
   stage: prod
   environment:
     TABLE_NAME: Wupark-Pi-Image-Table
+  apiGateway:
+    apiKeys:
+      - name: wupark-api-key
   iam:
     role:
       statements:
@@ -27,6 +30,7 @@ functions:
       - http:
           path: wupark/image
           method: post
+          private: true
           cors: true
      
 
