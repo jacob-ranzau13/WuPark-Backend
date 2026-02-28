@@ -9,7 +9,7 @@ provider:
     TABLE_NAME: Wupark-Pi-Image-Table
   apiGateway:
     apiKeys:
-      - name: wupark-api-key
+      - name: wupark-PiDb-api-key
   iam:
     role:
       statements:
