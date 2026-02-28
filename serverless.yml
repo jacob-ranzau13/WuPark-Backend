@@ -7,6 +7,9 @@ provider:
   stage: prod
   environment:
     TABLE_NAME: WuparkItemsTable
+  apiGateway:
+    apiKeys:
+      - name: wupark-api-key
   iam:
     role:
       statements:
@@ -26,6 +29,7 @@ functions:
       - http:
           path: parking/availability
           method: post
+          private: true
           cors:
             origin: '*'
             headers:
@@ -38,6 +42,7 @@ functions:
       - http:
           path: parking/availability/{lotNum}
           method: get
+          private: true
           cors:
             origin: '*'
             headers:
