@@ -37,7 +37,7 @@ def compute_availability_from_predictions(
         for sid in stalls.keys()
     }
 
-    for idx, det in enumerate(preds):
+    for det in preds:
         label = det.get("class")
         class_id = det.get("class_id")
         
@@ -45,13 +45,8 @@ def compute_availability_from_predictions(
         x = det.get("x")
         y = det.get("y")
 
-        is_target_class = (label == target_class) or (class_id == 0 and target_class == "car")
-        
-        if not is_target_class:
-            continue
-        if conf < conf_thresh:
-            continue
-        if x is None or y is None:
+        is_target = (label == target_class) or (class_id == 0 and target_class == "car")
+        if not is_target or conf < conf_thresh or x is None or y is None:
             continue
 
         for stall_id, box in stalls.items():
