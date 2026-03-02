@@ -51,7 +51,7 @@ def point_in_box(x: float, y: float, box: Dict[str, int]) -> bool:
 
 # Function to compare roboflow bboxes with stalls
 def compute_availability_from_predictions(
-    preds: List[Dict[str, Any]],
+    predicts: List[Dict[str, Any]],
     stalls: Dict[str, Dict[str, int]],
     target_class: str = "car",
     conf_thresh: float = 0.4,
@@ -60,11 +60,11 @@ def compute_availability_from_predictions(
     
 
     status: Dict[str, Dict[str, Any]] = {
-        sid: {"occupied": False, "cars": []}
+        sid: {"occupied": False}
         for sid in stalls.keys()
     }
 
-    for det in preds:
+    for det in predicts:
         label = det.get("class")
         class_id = det.get("class_id")
 
@@ -72,8 +72,7 @@ def compute_availability_from_predictions(
         if conf < conf_thresh:
             continue
 
-        is_target = (label == target_class) or (class_id == 0 and target_class == "car")
-        if not is_target:
+        if not ((label == target_class) or (class_id == 0 and target_class == "car")):
             continue
 
         try:
@@ -89,7 +88,6 @@ def compute_availability_from_predictions(
             ov = overlap_area(car_box, stall_box)
             if ov / car_area >= overlap_thresh:
                 status[stall_id]["occupied"] = True
-                status[stall_id]["cars"].append(det)
 
     return status
 
@@ -158,7 +156,6 @@ def process_image_stream(event, context):
                     "timestamp": timestamp,
                     "availability": availability
                 }
-
                 post_availability(payload)
                 
             finally:

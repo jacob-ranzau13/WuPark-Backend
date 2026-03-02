@@ -14,7 +14,6 @@ class TestAvailability(unittest.TestCase):
         ]
 
         availability = image_processor.compute_availability_from_predictions(preds, stalls)
-
         self.assertIn("S1", availability)
         self.assertTrue(availability["S1"]["occupied"])
         self.assertIsInstance(availability["S1"]["cars"], list)
