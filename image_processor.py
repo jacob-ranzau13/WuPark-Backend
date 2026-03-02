@@ -3,7 +3,7 @@ import json
 import base64
 import tempfile
 from typing import Dict, Any, List
-from inference_sdk import InferenceHTTPClient
+from inference_sdk import InferenceHTTPClient 
 
 # Import our API modules
 from postToItemsDb import post_availability
@@ -20,38 +20,76 @@ rf_client = InferenceHTTPClient(
 )
 
 
-# Helper function to check if a point is inside a bounding box
+# Bounding Box helpers
+def rect_from_prediction(det: Dict[str, Any]) -> Dict[str, float]: # Now uses width/height to compute rectangle instead of centerpoint
+    half_w = det["width"] / 2
+    half_h = det["height"] / 2
+    return {
+        "x1": det["x"] - half_w,
+        "y1": det["y"] - half_h,
+        "x2": det["x"] + half_w,
+        "y2": det["y"] + half_h,
+    }
+
+def area(box: Dict[str, float]) -> float:
+    return max(0.0, box["x2"] - box["x1"]) * max(0.0, box["y2"] - box["y1"])
+
+def overlap_area(box1: Dict[str, float], box2: Dict[str, float]) -> float:
+    x1 = max(box1["x1"], box2["x1"])
+    y1 = max(box1["y1"], box2["y1"])
+    x2 = min(box1["x2"], box2["x2"])
+    y2 = min(box1["y2"], box2["y2"])
+    if x2 <= x1 or y2 <= y1:
+        return 0.0
+    return (x2 - x1) * (y2 - y1)
+
+
+# Old point-in-box logic left just in case
 def point_in_box(x: float, y: float, box: Dict[str, int]) -> bool:
     return box["x1"] <= x <= box["x2"] and box["y1"] <= y <= box["y2"]
 
-# Function to actually compare Roboflow centerpoint with stall boundaries
+
+# Function to compare roboflow bboxes with stalls
 def compute_availability_from_predictions(
     preds: List[Dict[str, Any]],
     stalls: Dict[str, Dict[str, int]],
     target_class: str = "car",
     conf_thresh: float = 0.4,
+    overlap_thresh: float = 0.15,  # require 15% of car bbox (need to run full demo to finetune)
 ) -> Dict[str, Any]:
     
+
     status: Dict[str, Dict[str, Any]] = {
-        sid: {"occupied": False}
+        sid: {"occupied": False, "cars": []}
         for sid in stalls.keys()
     }
 
     for det in preds:
         label = det.get("class")
         class_id = det.get("class_id")
-        
-        conf = det.get("confidence", 0.0)
-        x = det.get("x")
-        y = det.get("y")
 
-        is_target = (label == target_class) or (class_id == 0 and target_class == "car")
-        if not is_target or conf < conf_thresh or x is None or y is None:
+        conf = det.get("confidence", 0.0)
+        if conf < conf_thresh:
             continue
 
-        for stall_id, box in stalls.items():
-            if point_in_box(x, y, box):
+        is_target = (label == target_class) or (class_id == 0 and target_class == "car")
+        if not is_target:
+            continue
+
+        try:
+            car_box = rect_from_prediction(det)
+        except KeyError:
+            continue  # detection error
+
+        car_area = area(car_box)
+        if car_area <= 0:
+            continue
+
+        for stall_id, stall_box in stalls.items():
+            ov = overlap_area(car_box, stall_box)
+            if ov / car_area >= overlap_thresh:
                 status[stall_id]["occupied"] = True
+                status[stall_id]["cars"].append(det)
 
     return status
 
