@@ -28,7 +28,9 @@ def handle_message(payload):
     }
 
     url = os.getenv("aws_url")
-    response = rq.post(url, json=data)
+    key = os.getenv("aws_api_key")
+    headers = {"x-api-key": key}
+    response = rq.post(url=url, json=data, headers=headers)
 
     print("Status:", response.status_code)
 
