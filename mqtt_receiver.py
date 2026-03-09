@@ -28,7 +28,9 @@ def handle_message(payload):
     }
 
     url = os.getenv("aws_url")
-    response = rq.post(url, json=data)
+    key = os.getenv("aws_api_key")
+    headers = {"x-api-key": key}
+    response = rq.post(url=url, json=data, headers=headers)
 
     print("Status:", response.status_code)
 
@@ -67,7 +69,7 @@ def subscribe(client: mqtt_client):
 
 def main():
     db_funcs.table_setup() # ensure the database table is set up
-    load_dotenv()  # load environment variables from .env file
+    load_dotenv("env\\.env")  # load environment variables from .env file
     client = connect_mqtt()
     subscribe(client)
     client.loop_forever() # subscribe to messages indefinitely
