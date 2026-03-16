@@ -9,10 +9,6 @@ AVAILABILITY_API_KEY = os.getenv("AVAILABILITY_API_KEY")
 
 
 def post_availability(payload: Dict[str, Any]) -> bool:
-    if not POST_AVAILABILITY_URL:
-        print("[PostToItemsDb] POST_AVAILABILITY_URL not configured")
-        return False
-    
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {AVAILABILITY_API_KEY}"
