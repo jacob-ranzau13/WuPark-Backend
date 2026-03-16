@@ -6,6 +6,7 @@ Environment variables required (set in AWS Lambda or locally for testing):
 
 - `ROBOFLOW_API_KEY` - Roboflow inference API key (required to call Roboflow workflows).
 - `POST_AVAILABILITY_URL` - The API endpoint to POST computed availability (the items DB API).
+- `AVAILABILITY_API_KEY` - API key for authenticating with the availability POST endpoint.
 - `GET_STALL_CONFIG_URL` - (optional) URL to fetch stall configuration; defaults are used if empty.
 
 Quick local smoke-run (PowerShell):

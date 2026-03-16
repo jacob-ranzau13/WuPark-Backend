@@ -4,6 +4,8 @@ from typing import Dict, Any
 
 
 POST_AVAILABILITY_URL = os.getenv("POST_AVAILABILITY_URL")
+AVAILABILITY_API_KEY = os.getenv("AVAILABILITY_API_KEY")
+
 
 
 def post_availability(payload: Dict[str, Any]) -> bool:
@@ -11,11 +13,16 @@ def post_availability(payload: Dict[str, Any]) -> bool:
         print("[PostToItemsDb] POST_AVAILABILITY_URL not configured")
         return False
     
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {AVAILABILITY_API_KEY}"
+    }
+    
     try:
         response = requests.post(
             POST_AVAILABILITY_URL,
             json=payload,
-            headers={"Content-Type": "application/json"},
+            headers=headers,
             timeout=10
         )
         
