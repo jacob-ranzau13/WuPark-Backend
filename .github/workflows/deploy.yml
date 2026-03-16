@@ -42,5 +42,6 @@ jobs:
           SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
           ROBOFLOW_API_KEY: ${{ secrets.ROBOFLOW_API_KEY }}
           POST_AVAILABILITY_URL: ${{ secrets.POST_AVAILABILITY_URL }}
+          AVAILABILITY_API_KEY: ${{ secrets.AVAILABILITY_API_KEY }}
           GET_STALL_CONFIG_URL: ${{ secrets.GET_STALL_CONFIG_URL }}
         run: npx serverless deploy --verbose
