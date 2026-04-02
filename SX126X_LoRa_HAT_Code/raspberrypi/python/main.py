@@ -63,7 +63,7 @@ def get_cpu_temp():
 #
 
 # node = sx126x.sx126x(serial_num = "/dev/ttyS0",freq=433,addr=0,power=22,rssi=False,air_speed=2400,relay=False)
-node = sx126x.sx126x(serial_num = "/dev/ttyS0",freq=868,addr=0,power=22,rssi=True,air_speed=2400,relay=False)
+node = sx126x.sx126x(serial_num = "/dev/ttyS0",freq=915,addr=0,power=22,rssi=True,air_speed=2400,relay=False)
 
 def send_deal():
     get_rec = ""
@@ -81,7 +81,7 @@ def send_deal():
 
     get_t = get_rec.split(",")
 
-    offset_frequence = int(get_t[1])-(850 if int(get_t[1])>850 else 410)
+    offset_frequence = int(get_t[1])-(850 if int(get_t[1])>900 else 410)
     #
     # the sending message format
     #
@@ -103,13 +103,13 @@ def send_cpu_continue(continue_or_not = True):
         #
         # boarcast the cpu temperature at 868.125MHz
         #
-        data = bytes([255]) + bytes([255]) + bytes([18]) + bytes([255]) + bytes([255]) + bytes([12]) + "CPU Temperature:".encode()+str(get_cpu_temp()).encode()+" C".encode()
+        data = bytes([255]) + bytes([255]) + bytes([65]) + bytes([255]) + bytes([255]) + bytes([65]) + "CPU Temperature:".encode()+str(get_cpu_temp()).encode()+" C".encode()
         node.send(data)
         time.sleep(0.2)
         timer_task = Timer(seconds,send_cpu_continue)
         timer_task.start()
     else:
-        data = bytes([255]) + bytes([255]) + bytes([18]) + bytes([255]) + bytes([255]) + bytes([12]) + "CPU Temperature:".encode()+str(get_cpu_temp()).encode()+" C".encode()
+        data = bytes([255]) + bytes([255]) + bytes([65]) + bytes([255]) + bytes([255]) + bytes([65]) + "CPU Temperature:".encode()+str(get_cpu_temp()).encode()+" C".encode()
         node.send(data)
         time.sleep(0.2)
         timer_task.cancel()
