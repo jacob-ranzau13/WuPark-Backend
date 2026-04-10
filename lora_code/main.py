@@ -91,7 +91,7 @@ class receiver_node():
             raw = self.node.receive()
             if raw is None:
                 continue
-
+            print("Received")
             # routing header: [dst_addr(2), dst_freq(1), src_addr(2), src_freq(1)] = 6 bytes
             # custom header:  [packet_num(2), checksum(2), total_packets(2), reserved(6)] = 12 bytes
             if len(raw) < 18:  # 6 bytes routing header + 12 bytes custom header
@@ -99,15 +99,17 @@ class receiver_node():
                 continue
 
             dst_addr = (raw[0] << 8) + raw[1]
+            print(str(dst_addr))
             if dst_addr != dest_addr and dst_addr != 65535:
+                print("Skipped")
                 continue  # not for us
 
             packet_num    = int.from_bytes(raw[6:8],   "big")
             checksum      = int.from_bytes(raw[8:10],  "big")
             total_packets = int.from_bytes(raw[10:12], "big")
-            lot_id        = int.from_bytes(raw[12])
-            node_status   = int.from_bytes(raw[13])
-            timestamp     = int.from_bytes(raw[14:18], "big")
+            lot_id        = raw[12]
+            node_status   = raw[13]
+            timestamp     = raw[14:18] 
             chunk         = raw[18:]
 
             if packet_num in packets:
