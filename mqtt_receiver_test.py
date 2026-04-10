@@ -1,4 +1,5 @@
 from paho.mqtt import client as mqtt_client
+from cryptography.fernet import Fernet
 import base64, json
 from prompt_toolkit import Application
 import requests as rq
@@ -16,18 +17,28 @@ work_q = queue.Queue()
 
 class MessageProcessor:
     @staticmethod
+    def encrypt_image(image_bytes: bytes) -> str:
+        key = os.getenv("encryption_key").encode()
+        cipher = Fernet(key)
+        encrypted = cipher.encrypt(image_bytes)
+        return base64.b64encode(encrypted).decode()
+    
+
+    @staticmethod
     def payload_to_json(payload: bytes) -> str:
         lotNum = payload[0]
         timestamp = int.from_bytes(payload[1:5], byteorder='big')
         status = payload[5]
         image_bytes = payload[6:]
 
+        encrypted_image = MessageProcessor.encrypt_image(image_bytes)
+
         data = {
             "lot_num": lotNum,
             "timestamp_unix": timestamp,
             "timestamp_readable": dt.datetime.fromtimestamp(timestamp).isoformat(),
             "status": status,
-            "image": len(image_bytes)
+            "image": encrypted_image
 
         }
 
