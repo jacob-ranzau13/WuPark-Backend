@@ -89,11 +89,8 @@ class receiver_node():
 
         while total_packets is None or len(packets) < total_packets:
             raw = self.node.receive()
-            start_time = None
             if raw is None:
                 continue
-            else:
-                start_time = time.time()
 
             # routing header: [dst_addr(2), dst_freq(1), src_addr(2), src_freq(1)] = 6 bytes
             # custom header:  [packet_num(2), checksum(2), total_packets(2), reserved(6)] = 12 bytes
@@ -125,14 +122,30 @@ class receiver_node():
             packets[packet_num] = chunk
             print(f"Received packet {packet_num + 1}/{total_packets}")
 
-            timedelta = time.time() - start_time
-            if timedelta > 30:  # 30 second timeout for receiving all packets
-                print("Reception timeout, aborting.")
-                return None
-
         with open(output_path, "wb") as f:
             for i in range(total_packets):
                 f.write(packets[i])
 
         print(f"File reconstructed: {output_path}")
         return (lot_id, node_status, timestamp, output_path)
+
+def main():
+    nodetype = int(input("Enter node type (1 for sender, 2 for receiver): "))
+    addr = int(input("Enter node address (0-65535): "))
+    if nodetype == 1:
+        sender = sender_node(addr)
+        dest_addr = int(input("Enter destination address (0-65535, 65535 for broadcast): "))
+        filepath = "error.jpg"
+        lot_id = int(input("Enter lot ID (0-255): "))
+        node_status = int(input("Enter node status (0=normal, 1=warning, 2=error): "))
+        sender.send_file(dest_addr, filepath, lot_id, node_status)
+    elif nodetype == 2:
+        receiver = receiver_node(addr)
+        output_path = "received_file.jpg"
+        receiver.receive_file(output_path)
+    else:
+        print("Invalid node type")
+        main()
+
+if __name__ == "__main__":
+    main()
