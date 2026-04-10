@@ -33,34 +33,33 @@ class sender_node():
         chunks = [data[i:i + PACKET_PAYLOAD] for i in range(0, len(data), PACKET_PAYLOAD)]
         total_packets = len(chunks)
 
-        for packet_num, chunk in enumerate(chunks, 1):
+        for packet_num, chunk in enumerate(chunks):
             checksum = sum(chunk) & 0xFFFF
 
             header = (
                 packet_num.to_bytes(2, "big") +
                 checksum.to_bytes(2, "big") +
                 total_packets.to_bytes(2, "big") +
-                lot_id.to_bytes(2, "big") +
+                lot_id.to_bytes(1, "big") +
                 node_status.to_bytes(1, "big") +
                 int(time.time()).to_bytes(4, "big")
             )
 
+            print(f"sending packet {packet_num}/{total_packets}")
             self.send_bytes(dest_addr, bytearray(header + chunk), 915)
-            time.sleep(0.5)               # brief gap between packets
+            time.sleep(5)               # brief gap between packets
 
-    def send_bytes(self, dest_addr: int, payload: bytearray, dest_freq: int = 868):
-        """
-        Transmit a bytearray to a destination node.
-
-        Args:
-            dest_addr: Destination node address (0-65535).
-                    65535 broadcasts to all nodes.
-            payload:   Raw data to transmit.
-            dest_freq: Destination frequency in MHz (default 868).
-        """
+    def send_bytes(self, dest_addr: int, payload: bytearray, dest_freq: int = 915):
         offset_freq = dest_freq - (850 if dest_freq > 850 else 410)
 
-        header = dest_addr.to_bytes(2, "big") + self.node.addr.to_bytes(2, "big") + offset_freq.to_bytes(2, "big")
+        header = bytes([
+            dest_addr >> 8,
+            dest_addr & 0xFF,
+            self.node.addr >> 8,
+            self.node.addr & 0xFF,
+            offset_freq >> 8,
+            offset_freq & 0xFF,
+        ])
 
         self.node.send(header + bytes(payload))
 
@@ -70,8 +69,7 @@ class receiver_node():
         self.addr = addr
     
     def receive_file(self, output_path: str):
-        """
-        Listen for incoming packets and reconstruct a file.
+        """ nstruct a file.
 
         Args:
             output_path: Where to write the reconstructed file.
