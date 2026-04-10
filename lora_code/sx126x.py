@@ -207,7 +207,7 @@ class sx126x:
         if self.ser.inWaiting() == 0:
             return None
 
-        time.sleep(0.1)
+        time.sleep(0.5)
         r_buff = self.ser.read(self.ser.inWaiting())
 
         if len(r_buff) < 4:

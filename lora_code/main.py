@@ -87,11 +87,11 @@ class receiver_node():
             print("Received")
             # routing header: [dst_addr(2), src_addr(2), freq_offset(2)] = 6 bytes
             # custom header:  [packet_num(2), checksum(2), total_packets(2), lot_id(2), node_status(1), timestamp(4)] = 13 bytes
-            if len(raw) < 19:  # 6 bytes routing header + 13 bytes custom header
+            if len(raw) < 18:  # 6 bytes routing header + 13 bytes custom header
                 print("Packet too short, skipping.")
                 continue
 
-            dst_addr = int.from_bytes(raw[0:2], "big")
+            dst_addr = (raw[0] << 8) + raw[1]
             print(str(dst_addr))
             if dst_addr != dest_addr and dst_addr != 65535:
                 print("Skipped")
@@ -100,10 +100,10 @@ class receiver_node():
             packet_num    = int.from_bytes(raw[6:8],   "big")
             checksum      = int.from_bytes(raw[8:10],  "big")
             total_packets = int.from_bytes(raw[10:12], "big")
-            lot_id        = int.from_bytes(raw[12:14], "big")
-            node_status   = raw[14]
-            timestamp     = int.from_bytes(raw[15:19], "big")
-            chunk         = raw[19:]
+            lot_id        = int.from_bytes(raw[12], "big")
+            node_status   = raw[13]
+            timestamp     = int.from_bytes(raw[14:18], "big")
+            chunk         = raw[18:]
 
             if packet_num in packets:
                 print(f"Duplicate packet {packet_num}, ignoring.")
