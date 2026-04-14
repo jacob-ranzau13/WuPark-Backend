@@ -167,8 +167,9 @@ class sx126x:
     def get_settings(self):
         GPIO.output(self.M1, GPIO.HIGH)
         time.sleep(0.1)
-
         self.ser.write(bytes([0xC1, 0x00, 0x09]))
+        print("called")
+        time.sleep(5)
         if self.ser.inWaiting() > 0:
             time.sleep(0.1)
             self.get_reg = self.ser.read(self.ser.inWaiting())
@@ -194,6 +195,16 @@ class sx126x:
         time.sleep(0.1)
 
     def receive(self) -> bytearray | None:
+        """
+        Check for incoming data and return the payload as a bytearray, or
+        None if nothing was received.
+
+        Packet layout (set by the sender in main.py):
+            byte 0–1 : source address (high, low)
+            byte 2   : source frequency offset
+            byte 3…  : payload  (everything up to the optional trailing RSSI byte)
+            last byte: RSSI byte appended by the module (only when rssi=True)
+        """
         if self.ser.inWaiting() == 0:
             return None
 
@@ -204,9 +215,19 @@ class sx126x:
             print("Received packet too short, ignoring.")
             return None
 
+        src_addr = (r_buff[0] << 8) + r_buff[1]
+        src_freq = r_buff[2] + self.start_freq
+
+        # The last byte is an RSSI byte appended by the hardware when rssi=True.
+        # Slice it off so callers always get a clean payload.
         if self.rssi:
-            return bytearray(r_buff[:-1])
-        return bytearray(r_buff)
+            payload  = bytearray(r_buff[3:-1])
+            rssi_val = 256 - r_buff[-1]
+        else:
+            payload  = bytearray(r_buff[3:])
+            rssi_val = None
+
+        return payload
 
     def get_channel_rssi(self):
         GPIO.output(self.M1, GPIO.LOW)
