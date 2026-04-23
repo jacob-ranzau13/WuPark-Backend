@@ -1,4 +1,4 @@
-from picamera2 import Picamera2
+from picamera2 import Picamera2, Preview
 import time
 
 def capture(cam, timestamp):
@@ -9,10 +9,11 @@ def capture(cam, timestamp):
 
 def main():
     picam2 = Picamera2()
-    config = picam2.create_still_configuration(main={"size": (1280, 720)}) # 720p is as high as we can go under 200 kb
-    picam2.configure(config)
+    camera_config = picam2.create_preview_configuration()
+    picam2.configure(camera_config)
+    picam2.start_preview(Preview.QTGL)
     picam2.start()
-
+    #time.sleep(300)
     timestamp = int(time.time())
     imageName = capture(picam2, timestamp)
     print(imageName)
