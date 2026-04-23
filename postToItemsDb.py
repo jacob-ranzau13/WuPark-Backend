@@ -4,7 +4,7 @@ from typing import Dict, Any
 
 
 POST_AVAILABILITY_URL = os.getenv("POST_AVAILABILITY_URL")
-AVAILABILITY_API_KEY = os.getenv("AVAILABILITY_API_KEY")
+AVAILABILITY_API_KEY = os.getenv("TEST_API_KEY")
 
 #Yippie
 
