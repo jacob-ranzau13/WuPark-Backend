@@ -128,12 +128,10 @@ def process_image_stream(event, context):
             timestamp = int(new_image['timestamp']['N'])
             
             print(f"[ImageProcessor] Processing lot {lot_num}, timestamp {timestamp}")
-            print(f"[ImageProcessor] Record keys: {list(new_image.keys())}")
-            
-            image_b64 = new_image.get('image', {}).get('B')
+           
+            image_b64 = new_image.get('image', {}).get('S')
             if not image_b64:
                 print(f"[ImageProcessor] No image data for lot {lot_num}")
-                print(f"[ImageProcessor] Full record: {json.dumps(new_image, default=str)}")
                 continue
             
             image_bytes = base64.b64decode(image_b64)
