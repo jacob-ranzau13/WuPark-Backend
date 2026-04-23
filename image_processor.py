@@ -51,7 +51,7 @@ def compute_availability_from_predictions(
     stalls: Dict[str, Dict[str, int]],
     target_class: str = "car",
     conf_thresh: float = 0.4,
-    overlap_thresh: float = 0.10    #require 10% of car bbox (need to run full demo to finetune)
+    overlap_thresh: float = 0.05  #require 5% of car bbox (need to run full demo to finetune)
 ) -> Dict[str, Any]:
     
 
