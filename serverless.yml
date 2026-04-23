@@ -8,6 +8,14 @@ plugins:
 custom:
   pythonRequirements:
     dockerizePip: true
+    slim: true
+    strip: false
+    zip: true
+    layer:
+      name: ${self:service}-dependencies
+      description: Python dependencies for image processing
+      compatibleRuntimes:
+        - python3.12
 
 provider:
   name: aws
@@ -35,6 +43,9 @@ functions:
   image_processor:
     handler: image_processor.process_image_stream
     timeout: 300
+    memorySize: 512
+    layers:
+      - Ref: PythonRequirementsLambdaLayer
     events:
       - stream:
           type: dynamodb

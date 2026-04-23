@@ -128,7 +128,7 @@ def process_image_stream(event, context):
             lot_num = int(new_image['lotNum']['N'])
             timestamp = int(new_image['timestamp']['N'])
             
-            image_b64 = new_image.get('image', {}).get('B')
+            image_b64 = new_image.get('image', {}).get('S', 'B')
             if not image_b64:
                 print(f"[ImageProcessor] No image data for lot {lot_num}")
                 continue
