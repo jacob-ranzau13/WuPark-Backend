@@ -60,6 +60,8 @@ def compute_availability_from_predictions(
         for sid in stalls.keys()
     }
 
+    print(f"[Availability] {len(predicts)} predictions received, {len(stalls)} stalls to check")
+
     for det in predicts:
         label = det.get("class")
         class_id = det.get("class_id")
@@ -80,9 +82,13 @@ def compute_availability_from_predictions(
         if car_area <= 0:
             continue
 
+        print(f"[Availability] Car at x={det.get('x'):.1f} y={det.get('y'):.1f} w={det.get('width')} h={det.get('height')} conf={conf:.2f} box={car_box}")
+
         for stall_id, stall_box in stalls.items():
             ov = overlap_area(car_box, stall_box)
-            if ov / car_area >= overlap_thresh:
+            ratio = ov / car_area
+            if ratio >= overlap_thresh:
+                print(f"[Availability]   -> {stall_id} OCCUPIED (overlap ratio {ratio:.2f})")
                 status[stall_id]["occupied"] = True
 
     return status
