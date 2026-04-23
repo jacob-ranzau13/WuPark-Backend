@@ -54,7 +54,7 @@ def extract_stall_centers(image_path, min_column_gap=20, show=True):
     return stall_centers
 
 if __name__ == "__main__":
-    image_path = "LotImages/Lot2 (1).jpg" # Update with image path
+    image_path = "../LotImages/new_lot_picture.jpg" # Update with image path
     stalls = extract_stall_centers(image_path, min_column_gap=40, show=True)
 
     print("\nExtracted stall coordinates grouped by columns:")
