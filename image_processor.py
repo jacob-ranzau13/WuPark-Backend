@@ -2,8 +2,8 @@ import os
 import json
 import base64
 import tempfile
+import requests
 from typing import Dict, Any, List
-from inference_sdk import InferenceHTTPClient 
 
 # Import our API modules
 from postToItemsDb import post_availability
@@ -13,11 +13,7 @@ from getStallInfo import get_stall_config
 ROBOFLOW_API_KEY = os.getenv("ROBOFLOW_API_KEY")
 ROBOFLOW_WORKSPACE = "wupark-demo-model"
 ROBOFLOW_WORKFLOW_ID = "find-cars-2"
-
-rf_client = InferenceHTTPClient(
-    api_url="https://serverless.roboflow.com",
-    api_key=ROBOFLOW_API_KEY,
-)
+ROBOFLOW_WORKFLOW_URL = f"https://detect.roboflow.com/{ROBOFLOW_WORKSPACE}/{ROBOFLOW_WORKFLOW_ID}"
 
 
 # Bounding Box helpers
@@ -93,17 +89,20 @@ def compute_availability_from_predictions(
 
 
 def run_roboflow_workflow(image_path: str) -> List[Dict[str, Any]]:
-    wf_result = rf_client.run_workflow(
-        workspace_name=ROBOFLOW_WORKSPACE,
-        workflow_id=ROBOFLOW_WORKFLOW_ID,
-        images={"image": image_path},
-        use_cache=True,
-    )
-
+    with open(image_path, 'rb') as f:
+        response = requests.post(
+            ROBOFLOW_WORKFLOW_URL,
+            params={'api_key': ROBOFLOW_API_KEY},
+            files={'file': f}
+        )
+    response.raise_for_status()
+    result = response.json()
+    
     try:
-        predicts = wf_result[0]["predictions"]["predictions"]
-    except (KeyError, IndexError, TypeError) as e:
+        predicts = result.get("predictions", [])
+    except (KeyError, TypeError) as e:
         print(f"[ImageProcessor] Error extracting predictions: {e}")
+        print(f"[ImageProcessor] Response: {result}")
         raise
 
     return predicts

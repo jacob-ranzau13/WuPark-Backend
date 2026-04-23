@@ -8,9 +8,6 @@ plugins:
 custom:
   pythonRequirements:
     dockerizePip: true
-    slim: true
-    strip: true
-    layer: true
 
 provider:
   name: aws
@@ -38,8 +35,6 @@ functions:
   image_processor:
     handler: image_processor.process_image_stream
     timeout: 300
-    layers:
-      - {Ref: PythonRequirementsLambdaLayer}
     events:
       - stream:
           type: dynamodb
