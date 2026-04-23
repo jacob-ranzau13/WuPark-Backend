@@ -141,7 +141,7 @@ def process_image_stream(event, context):
             image_bytes = base64.b64decode(image_b64)
             
             # Get stall coordinates using getStallInfo
-            stalls = get_stall_config()
+            stalls = get_stall_config(lot_num)
             
             # Give image bytes a file path for Roboflow
             with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp:
