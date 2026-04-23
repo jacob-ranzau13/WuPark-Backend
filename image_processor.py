@@ -112,17 +112,12 @@ def run_roboflow_workflow(image_path: str) -> List[Dict[str, Any]]:
 
     try:
         outputs = result.get("outputs", [])
-        preds_obj = outputs[0].get("predictions", {})
-        predicts = preds_obj.get("predictions", [])
-        img = preds_obj.get("image", {})
-        img_w = img.get("width", 640)
-        img_h = img.get("height", 480)
+        predicts = outputs[0].get("predictions", {}).get("predictions", [])
     except (KeyError, IndexError, TypeError) as e:
         print(f"[ImageProcessor] Error extracting predictions: {e}")
         raise
 
-    print(f"[ImageProcessor] Image size from Roboflow: {img_w}x{img_h}")
-    return predicts, img_w, img_h
+    return predicts
 
 
 # Main Lambda handler
@@ -161,24 +156,10 @@ def process_image_stream(event, context):
             
             try:
                 # Run Roboflow detection
-                predictions, img_w, img_h = run_roboflow_workflow(tmp_path)
-
-                # Scale stall coords from reference (640x480) to actual image size
-                x_scale = img_w / 640
-                y_scale = img_h / 480
-                scaled_stalls = {
-                    sid: {
-                        "x1": box["x1"] * x_scale,
-                        "y1": box["y1"] * y_scale,
-                        "x2": box["x2"] * x_scale,
-                        "y2": box["y2"] * y_scale,
-                    }
-                    for sid, box in stalls.items()
-                }
-                print(f"[ImageProcessor] Scaling stalls by x={x_scale:.2f} y={y_scale:.2f}")
+                predictions = run_roboflow_workflow(tmp_path)
 
                 # Get stall availability
-                availability = compute_availability_from_predictions(predictions, scaled_stalls)
+                availability = compute_availability_from_predictions(predictions, stalls)
 
                 # Post to API using postToItemsDb
                 payload = {
