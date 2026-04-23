@@ -10,6 +10,13 @@ provider:
   apiGateway:
     apiKeys:
       - name: wupark-api-key
+    usagePlan:
+      quota:
+        limit: 5000
+        period: MONTH
+      throttle:
+        rateLimit: 100
+        burstLimit: 200
   iam:
     role:
       statements:
