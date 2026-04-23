@@ -13,7 +13,7 @@ from getStallInfo import get_stall_config
 ROBOFLOW_API_KEY = os.getenv("ROBOFLOW_API_KEY")
 ROBOFLOW_WORKSPACE = "wupark-demo-model"
 ROBOFLOW_WORKFLOW_ID = "find-cars-2"
-ROBOFLOW_WORKFLOW_URL = f"https://detect.roboflow.com/{ROBOFLOW_WORKSPACE}/{ROBOFLOW_WORKFLOW_ID}"
+ROBOFLOW_WORKFLOW_URL = f"https://serverless.roboflow.com/{ROBOFLOW_WORKSPACE}/{ROBOFLOW_WORKFLOW_ID}"
 
 
 # Bounding Box helpers
