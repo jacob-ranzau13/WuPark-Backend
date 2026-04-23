@@ -210,3 +210,4 @@ __marimo__/
 LotImages/
 tests/test_roboflow_raw.py
 tests/test_post_availability.py
+tests/test_availability_logic.py
