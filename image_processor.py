@@ -2,8 +2,8 @@ import os
 import json
 import base64
 import tempfile
-import requests
 from typing import Dict, Any, List
+from inference_sdk import InferenceHTTPClient 
 
 # Import our API modules
 from postToItemsDb import post_availability
@@ -13,7 +13,11 @@ from getStallInfo import get_stall_config
 ROBOFLOW_API_KEY = os.getenv("ROBOFLOW_API_KEY")
 ROBOFLOW_WORKSPACE = "wupark-demo-model"
 ROBOFLOW_WORKFLOW_ID = "find-cars-2"
-ROBOFLOW_WORKFLOW_URL = f"https://serverless.roboflow.com/{ROBOFLOW_WORKSPACE}/{ROBOFLOW_WORKFLOW_ID}"
+
+rf_client = InferenceHTTPClient(
+    api_url="https://serverless.roboflow.com",
+    api_key=ROBOFLOW_API_KEY,
+)
 
 
 # Bounding Box helpers
@@ -89,20 +93,17 @@ def compute_availability_from_predictions(
 
 
 def run_roboflow_workflow(image_path: str) -> List[Dict[str, Any]]:
-    with open(image_path, 'rb') as f:
-        response = requests.post(
-            ROBOFLOW_WORKFLOW_URL,
-            params={'api_key': ROBOFLOW_API_KEY},
-            files={'file': f}
-        )
-    response.raise_for_status()
-    result = response.json()
-    
+    wf_result = rf_client.run_workflow(
+        workspace_name=ROBOFLOW_WORKSPACE,
+        workflow_id=ROBOFLOW_WORKFLOW_ID,
+        images={"image": image_path},
+        use_cache=True,
+    )
+
     try:
-        predicts = result.get("predictions", [])
-    except (KeyError, TypeError) as e:
+        predicts = wf_result[0]["predictions"]["predictions"]
+    except (KeyError, IndexError, TypeError) as e:
         print(f"[ImageProcessor] Error extracting predictions: {e}")
-        print(f"[ImageProcessor] Response: {result}")
         raise
 
     return predicts
@@ -127,9 +128,7 @@ def process_image_stream(event, context):
             lot_num = int(new_image['lotNum']['N'])
             timestamp = int(new_image['timestamp']['N'])
             
-            print(f"[ImageProcessor] Processing lot {lot_num}, timestamp {timestamp}")
-           
-            image_b64 = new_image.get('image', {}).get('S')
+            image_b64 = new_image.get('image', {}).get('B')
             if not image_b64:
                 print(f"[ImageProcessor] No image data for lot {lot_num}")
                 continue
@@ -137,7 +136,7 @@ def process_image_stream(event, context):
             image_bytes = base64.b64decode(image_b64)
             
             # Get stall coordinates using getStallInfo
-            stalls = get_stall_config(lot_num)
+            stalls = get_stall_config()
             
             # Give image bytes a file path for Roboflow
             with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp:
