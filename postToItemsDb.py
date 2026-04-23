@@ -6,7 +6,7 @@ from typing import Dict, Any
 POST_AVAILABILITY_URL = os.getenv("POST_AVAILABILITY_URL")
 AVAILABILITY_API_KEY = os.getenv("TEST_API_KEY")
 
-#Yippie
+#Yippie!
 
 def post_availability(payload: Dict[str, Any]) -> bool:
     headers = {
