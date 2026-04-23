@@ -87,7 +87,7 @@ def compute_availability_from_predictions(
 
     return status
 
-
+# Roboflow updated helper
 def run_roboflow_workflow(image_path: str) -> List[Dict[str, Any]]:
     with open(image_path, 'rb') as f:
         image_b64 = base64.b64encode(f.read()).decode('utf-8')
