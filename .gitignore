@@ -205,3 +205,9 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Local test files
+LotImages/
+tests/test_roboflow_raw.py
+tests/test_post_availability.py
+tests/test_availability_logic.py

@@ -13,7 +13,7 @@ from getStallInfo import get_stall_config
 ROBOFLOW_API_KEY = os.getenv("ROBOFLOW_API_KEY")
 ROBOFLOW_WORKSPACE = "wupark-demo-model"
 ROBOFLOW_WORKFLOW_ID = "find-cars-2"
-ROBOFLOW_WORKFLOW_URL = f"https://detect.roboflow.com/{ROBOFLOW_WORKSPACE}/{ROBOFLOW_WORKFLOW_ID}"
+ROBOFLOW_WORKFLOW_URL = f"https://serverless.roboflow.com/{ROBOFLOW_WORKSPACE}/workflows/{ROBOFLOW_WORKFLOW_ID}"
 
 
 # Bounding Box helpers
@@ -60,6 +60,8 @@ def compute_availability_from_predictions(
         for sid in stalls.keys()
     }
 
+    print(f"[Availability] {len(predicts)} predictions received, {len(stalls)} stalls to check")
+
     for det in predicts:
         label = det.get("class")
         class_id = det.get("class_id")
@@ -80,14 +82,18 @@ def compute_availability_from_predictions(
         if car_area <= 0:
             continue
 
+        print(f"[Availability] Car at x={det.get('x'):.1f} y={det.get('y'):.1f} w={det.get('width')} h={det.get('height')} conf={conf:.2f} box={car_box}")
+
         for stall_id, stall_box in stalls.items():
             ov = overlap_area(car_box, stall_box)
-            if ov / car_area >= overlap_thresh:
+            ratio = ov / car_area
+            if ratio >= overlap_thresh:
+                print(f"[Availability]   -> {stall_id} OCCUPIED (overlap ratio {ratio:.2f})")
                 status[stall_id]["occupied"] = True
 
     return status
 
-
+# Roboflow updated helper
 def run_roboflow_workflow(image_path: str) -> List[Dict[str, Any]]:
     with open(image_path, 'rb') as f:
         image_b64 = base64.b64encode(f.read()).decode('utf-8')
@@ -141,7 +147,7 @@ def process_image_stream(event, context):
             image_bytes = base64.b64decode(image_b64)
             
             # Get stall coordinates using getStallInfo
-            stalls = get_stall_config()
+            stalls = get_stall_config(lot_num)
             
             # Give image bytes a file path for Roboflow
             with tempfile.NamedTemporaryFile(suffix='.jpg', delete=False) as tmp:
@@ -151,7 +157,7 @@ def process_image_stream(event, context):
             try:
                 # Run Roboflow detection
                 predictions = run_roboflow_workflow(tmp_path)
-                
+
                 # Get stall availability
                 availability = compute_availability_from_predictions(predictions, stalls)
 
