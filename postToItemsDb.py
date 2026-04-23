@@ -11,7 +11,7 @@ AVAILABILITY_API_KEY = os.getenv("AVAILABILITY_API_KEY")
 def post_availability(payload: Dict[str, Any]) -> bool:
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {AVAILABILITY_API_KEY}"
+        "x-api-key": AVAILABILITY_API_KEY
     }
     
     try:
@@ -29,7 +29,7 @@ def post_availability(payload: Dict[str, Any]) -> bool:
             return True
         else:
             print(f"[PostToItemsDb] Failed: {response.status_code} {response.text}")
-            print(f"[PostToItemsDb] Request headers sent: { {k: v[:10] + '...' if k == 'Authorization' else v for k, v in headers.items()} }")
+            print(f"[PostToItemsDb] Request headers sent: { {k: v[:10] + '...' if k == 'x-api-key' else v for k, v in headers.items()} }")
             return False
             
     except Exception as e:
