@@ -93,15 +93,24 @@ def compute_availability_from_predictions(
 
 
 def run_roboflow_workflow(image_path: str) -> List[Dict[str, Any]]:
-    wf_result = rf_client.run_workflow(
-        workspace_name=ROBOFLOW_WORKSPACE,
-        workflow_id=ROBOFLOW_WORKFLOW_ID,
-        images={"image": image_path},
-        use_cache=True,
+    with open(image_path, 'rb') as f:
+        image_b64 = base64.b64encode(f.read()).decode('utf-8')
+
+    response = requests.post(
+        ROBOFLOW_WORKFLOW_URL,
+        json={
+            "api_key": ROBOFLOW_API_KEY,
+            "inputs": {
+                "image": {"type": "base64", "value": image_b64}
+            }
+        }
     )
+    response.raise_for_status()
+    result = response.json()
 
     try:
-        predicts = wf_result[0]["predictions"]["predictions"]
+        outputs = result.get("outputs", [])
+        predicts = outputs[0].get("predictions", {}).get("predictions", [])
     except (KeyError, IndexError, TypeError) as e:
         print(f"[ImageProcessor] Error extracting predictions: {e}")
         raise
