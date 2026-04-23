@@ -2,15 +2,18 @@ service: wupark-backend-image-processing
 
 frameworkVersion: ~4.27.0
 
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
+
 provider:
   name: aws
+  runtime: python3.12
   region: us-east-1
   stage: prod
-  ecr:
-    images:
-      imageprocessor:
-        path: ./
-        file: Dockerfile
   environment:
     IMAGE_TABLE_NAME: Wupark-Pi-Image-Table
     ROBOFLOW_API_KEY: ${env:ROBOFLOW_API_KEY}
@@ -30,9 +33,8 @@ provider:
 
 functions:
   image_processor:
-    image: imageprocessor
+    handler: image_processor.process_image_stream
     timeout: 300
-    memorySize: 1024
     events:
       - stream:
           type: dynamodb

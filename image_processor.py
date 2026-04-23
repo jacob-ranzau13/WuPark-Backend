@@ -2,8 +2,8 @@ import os
 import json
 import base64
 import tempfile
+import requests
 from typing import Dict, Any, List
-from inference_sdk import InferenceHTTPClient 
 
 # Import our API modules
 from postToItemsDb import post_availability
@@ -13,11 +13,7 @@ from getStallInfo import get_stall_config
 ROBOFLOW_API_KEY = os.getenv("ROBOFLOW_API_KEY")
 ROBOFLOW_WORKSPACE = "wupark-demo-model"
 ROBOFLOW_WORKFLOW_ID = "find-cars-2"
-
-rf_client = InferenceHTTPClient(
-    api_url="https://serverless.roboflow.com",
-    api_key=ROBOFLOW_API_KEY,
-)
+ROBOFLOW_WORKFLOW_URL = f"https://detect.roboflow.com/{ROBOFLOW_WORKSPACE}/{ROBOFLOW_WORKFLOW_ID}"
 
 
 # Bounding Box helpers
