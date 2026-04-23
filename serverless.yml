@@ -2,6 +2,16 @@ service: wupark-backend-image-processing
 
 frameworkVersion: ~4.27.0
 
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
+    slim: true
+    strip: true
+    layer: true
+
 provider:
   name: aws
   runtime: python3.11
@@ -28,6 +38,8 @@ functions:
   image_processor:
     handler: image_processor.process_image_stream
     timeout: 300
+    layers:
+      - {Ref: PythonRequirementsLambdaLayer}
     events:
       - stream:
           type: dynamodb
