@@ -68,7 +68,7 @@ class MessageProcessor:
         return b64encode(encrypted).decode()
 
     def payload_to_json(self, payload: bytes) -> str:
-        lotNum = payload[0]
+        lotNum = LOT_NUM
         timestamp = int.from_bytes(payload[1:5], 'big')
         status = payload[5]
         image_bytes = payload[6:]
@@ -96,12 +96,16 @@ def main():
     load_dotenv(dotenv_path = ".env")
     camera = CameraModule()
     processor = MessageProcessor(camera)
+    run_camera_loop = False
 
     while True:
-        payload = processor.build_payload(status=0)  # Example status
-        print("Payload built, sending message...")
-        status_code = processor.post_message(payload)
-        print(f"Message sent with status {status_code}, waiting before next capture...")
-        sleep(10)
+        nextInput = str(input("Enter q to quit, anything else to take a photo: "))
+        if nextInput != 'q':
+            payload = processor.build_payload(status=0)  # Example status
+            print("\nPayload built, sending message...")
+            status_code = processor.post_message(payload)
+            print(f"Message sent with status {status_code}")
+        else:
+            break
 
 if __name__ == "__main__":    main()
