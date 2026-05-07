@@ -177,7 +177,7 @@ def extract_stall_boundaries(image_path, min_column_gap=20, stall_width_estimate
 
 
 if __name__ == "__main__":
-    image_path = "LotImages/lot1_eoh_final.jpg"
+    image_path = "LotImages/lot2_eoh_final.jpg"
    
     # Use click capture mode
     print("Starting click capture mode...")
