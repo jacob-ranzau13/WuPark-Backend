@@ -3,8 +3,8 @@ from typing import Dict, Tuple
 BBoxTuple = Tuple[int, int, int, int]
 
 LOT_1_STALLS: Dict[str, BBoxTuple] = {
-    "A1": (264, 522, 278, 678),
-    "A2": (351, 527, 381, 679),
+    "A1": (264, 523, 287, 673),
+    "A2": (349, 525, 395, 675),
     "A3": (441, 528, 487, 683),
     "A4": (528, 529, 585, 682),
     "A5": (613, 534, 688, 684),
